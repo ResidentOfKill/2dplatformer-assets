@@ -1,0 +1,38 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
+using UnityEngine.UIElements;
+
+public class Jump : MonoBehaviour
+{
+    private float horizontal;
+    [SerializeField] private float jumpPower = 1000f;
+    [SerializeField] private float moveSpeed = 4f;
+
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private LayerMask groundLayer;
+    private Rigidbody2D rb;
+
+    private void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+    }
+
+    void Update()
+    {
+        var velocity = rb.velocity;
+        if (Input.GetButtonDown("Jump")&& IsGrounded())
+        {
+            rb.AddForce(new Vector2(velocity.x,jumpPower));
+        }
+        
+    }
+
+    private bool IsGrounded()
+    {
+        return Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
+    }
+}
