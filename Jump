@@ -1,20 +1,21 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.Serialization;
-using UnityEngine.UIElements;
+
+
 
 public class Jump : MonoBehaviour
 {
     private float horizontal;
-    [SerializeField] private float jumpPower = 1000f;
+    [SerializeField] private float jumpPower = 2f;
     [SerializeField] private float moveSpeed = 4f;
+    [SerializeField] private float mass = 1f;
+    [SerializeField] private AnimationCurve jumpDampMod;
+
 
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
     private Rigidbody2D rb;
+    private float jumpUpTime;
 
     private void Start()
     {
@@ -23,12 +24,30 @@ public class Jump : MonoBehaviour
 
     void Update()
     {
+        rb.mass = mass;
+        rb.mass = rb.mass; // mass needs to get called to be actually set https://discussions.unity.com/t/rigidbody-mass-not-updating-in-inspector-after-calling-setdensity/84755
+
         var velocity = rb.velocity;
-        if (Input.GetButtonDown("Jump")&& IsGrounded())
+        jumpUpTime += Time.deltaTime;
+        if (Input.GetButtonDown("Jump") && IsGrounded())
         {
-            rb.AddForce(new Vector2(velocity.x,jumpPower));
+            jumpUpTime = 0f;
+            rb.AddForce(new Vector2(velocity.x, -Physics2D.gravity.y * jumpPower));
+           
         }
+
         
+        
+        if (rb.velocity.y == 0)
+        {
+
+        } 
+
+        if (rb.velocity.y >= 0 && !IsGrounded())
+        {
+
+            rb.gravityScale = jumpDampMod.Evaluate(Mathf.Clamp(jumpUpTime,0,2));
+        }
     }
 
     private bool IsGrounded()
